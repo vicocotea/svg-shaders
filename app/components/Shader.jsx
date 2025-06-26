@@ -25,8 +25,8 @@ export default function Shader({
   const mouseUsed = useRef(false);
   const [mouseDep, setMouseDep] = useState(0);
 
-  const canvasWidth = width;
-  const canvasHeight = height;
+  const canvasWidth = 100;
+  const canvasHeight = 100;
 
   useEffect(() => {
     mouseRef.current.x = mousePosition.x;
@@ -56,47 +56,20 @@ export default function Shader({
   }, [id, onFilterCreated]);
 
   useEffect(() => {
+    drawFragment();
+  }, []);
+
+  function drawFragment() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (!feImageRef.current) return;
     if (!feDisplacementMapRef.current) return;
 
     const context = canvas.getContext("2d");
-
-    const mouse = new Proxy(mouseRef.current, {
-      get: (target, prop) => {
-        mouseUsed.current = true;
-        return target[prop];
-      },
-    });
-
-    mouseUsed.current = false;
-
     const w = Math.floor(canvasWidth * canvasDPI);
     const h = Math.floor(canvasHeight * canvasDPI);
 
-    // console.log("!!!!! Canvas dimensions:", w, h, "Data length:", w * h * 4);
-
-    // Vérifier que les dimensions sont valides
-    if (w <= 0 || h <= 0 || !isFinite(w) || !isFinite(h)) {
-      console.error("!!!!! Invalid dimensions:", w, h);
-      return;
-    }
-
     const data = new Uint8ClampedArray(w * h * 4);
-
-    // Vérifier que la longueur des données est correcte
-    if (data.length !== w * h * 4) {
-      console.error(
-        "!!!!! Data length mismatch:",
-        data.length,
-        "expected:",
-        w * h * 4
-      );
-      return;
-    }
-
-    // console.log("scale", scale);
 
     // Dynamic scale to make it as smooth as possible to ensure the best quality
     // but also meet the requirements of the shader.
@@ -109,8 +82,7 @@ export default function Shader({
         {
           x: x / w,
           y: y / h,
-        },
-        mouse
+        }
       );
       const dx = pos.x * w - x;
       const dy = pos.y * h - y;
@@ -133,16 +105,7 @@ export default function Shader({
 
     feImageRef.current.setAttribute("href", canvas.toDataURL());
     // feDisplacementMapRef.current.setAttribute("scale", scale);//maxScale / canvasDPI);
-    // feDisplacementMapRef.current.setAttribute("scale", maxScale / canvasDPI);
-    if (debugRef.current) {
-      debugRef.current.textContent = `Displacement Map (scale = ${maxScale.toFixed(
-        2
-      )})`;
-    }
-  }, [width, height, fragment, mouseDep, canvasDPI]);
-
-
-
+  }
   return (
     <>
       <svg
@@ -151,31 +114,45 @@ export default function Shader({
         colorInterpolationFilters="sRGB"
         width={0}
         height={0}
-        style={{ display: "none" }}
+        // style={{ display: "none" }}
       >
         <defs>
           <filter
             id={`${id}_filter`}
             filterUnits="userSpaceOnUse"
-            colorInterpolationFilters="sRGB"
+            primitiveUnits="userSpaceOnUse"
             x="-10%"
             y="-10%"
             width="120%"
             height="120%"
           >
+            <feFlood
+              floodColor="#808000"
+              result="flood"
+              x={`${-Math.floor(width * 0.2)}px`}
+              y={`${-Math.floor(height * 0.2)}px`}
+              width={width * 1.4}
+              height={height * 1.4}
+            />
             <feImage
               id={`${id}_map`}
-              width={canvasWidth * 1.2}
-              height={canvasHeight * 1.2}
-              x={`${-Math.floor(canvasWidth * 0.1)}px`}
-              y={`${-Math.floor(canvasHeight * 0.1)}px`}
+              width={canvasWidth}
+              height={canvasHeight}
+              x={mousePosition.x - 50}
+              y={mousePosition.y - 50}
               ref={feImageRef}
               result="imageMap"
+              preserveAspectRatio="none"
             />
-            
+
+            <feMerge result="composed">
+              <feMergeNode in="flood" />
+              <feMergeNode in="imageMap" />
+            </feMerge>
+
             <feDisplacementMap
               in="SourceGraphic"
-              in2="imageMap"
+              in2="composed"
               xChannelSelector="R"
               yChannelSelector="G"
               ref={feDisplacementMapRef}
@@ -184,13 +161,57 @@ export default function Shader({
           </filter>
         </defs>
       </svg>
+
+      {/* Debug: Afficher le composite */}
+      {debug && (
+        <svg
+          width={width}
+          height={height}
+          filterUnits="userSpaceOnUse"
+          style={{ border: "1px solid red", margin: "10px" }}
+        >
+          <defs>
+            <filter
+              id={`${id}_debug_filter`}
+              filterUnits="userSpaceOnUse"
+              primitiveUnits="userSpaceOnUse"
+            >
+              <feFlood
+                floodColor="#808000"
+                result="flood"
+                x="-20%"
+                y="-20%"
+                width={width * 1.2}
+                height={height * 1.2}
+              />
+              <feImage
+                width={canvasWidth}
+                height={canvasHeight}
+                x="0"
+                y="0"
+                href={canvasRef.current?.toDataURL()}
+                result="imageMap"
+                preserveAspectRatio="none"
+              />
+              <feMerge result="composed">
+                <feMergeNode in="flood" />
+                <feMergeNode in="imageMap" />
+              </feMerge>
+            </filter>
+          </defs>
+          <rect
+            width={canvasWidth}
+            height={canvasHeight}
+            filter={`url(#${id}_debug_filter)`}
+            style={{ fill: "transparent" }}
+          />
+        </svg>
+      )}
       <canvas
         width={canvasWidth * canvasDPI}
         height={canvasHeight * canvasDPI}
         ref={canvasRef}
         style={{
-          position: "absolute",
-          left: "100%",
           display: debug ? "inline-block" : "none",
           width: canvasWidth,
           height: canvasHeight,

@@ -36,8 +36,8 @@ export default function Button({ children, debug, onClick, style, ...props }) {
 
     const updateSize = () => {
       const rect = buttonRef.current.getBoundingClientRect();
-      const newWidth = Math.max(1, Math.floor(rect.width));
-      const newHeight = Math.max(1, Math.floor(rect.height));
+      const newWidth = Math.max(1, Math.round(rect.width));
+      const newHeight = Math.max(1, Math.round(rect.height));
 
       console.log("Button size updated:", newWidth, newHeight);
 
@@ -106,27 +106,27 @@ export default function Button({ children, debug, onClick, style, ...props }) {
   };
 
   return (
-    <>
+    <div>
       <Shader
         width={buttonSize.width}
         height={buttonSize.height}
         debug={debug}
         scale={scale}
         mousePosition={mousePosition} // Passer la position de la souris
-        fragment={(uv, mouse) => {
+        fragment={(uv) => {
           // Garder le centre à 0.5 pour la logique de base
-          const centerX = mouse.x / buttonSize.width;
-          const centerY = mouse.y / buttonSize.height;
+          const centerX = 0.5;//mouse.x / buttonSize.width;
+          const centerY = 0.5;//mouse.y / buttonSize.height;
 
           // Compenser l'aspect ratio pour garder un effet circulaire
-          const aspectRatio = buttonSize.width / buttonSize.height;
+          const aspectRatio = 1;//buttonSize.width / buttonSize.height;
           const adjustedX = (uv.x - centerX) * aspectRatio;
           const adjustedY = uv.y - centerY;
 
           const distance = Math.sqrt(adjustedX ** 2 + adjustedY ** 2);
 
           // Normaliser le rayon par rapport à la taille du canvas pour avoir une taille fixe
-          const normalizedRadius = radius / (buttonSize.height / 100);
+          const normalizedRadius = radius// / (buttonSize.height / 100);
 
           // Create spherical volume effect that attracts pixels towards center
           // Only apply effect within the defined radius to prevent overflow
@@ -183,6 +183,6 @@ export default function Button({ children, debug, onClick, style, ...props }) {
       >
         {children || "Click me"}
       </button>
-    </>
+    </div>
   );
 }

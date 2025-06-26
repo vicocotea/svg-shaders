@@ -14,7 +14,7 @@ export default function Page() {
           setDebug(document.getElementById("debug").checked);
         }}
       />
-      <Button debug={debug}></Button>
+      {/* <Button debug={debug}></Button>
       <Button debug={debug}>Découvrir</Button>
       <Button debug={debug}>
         Découvrir
@@ -22,7 +22,7 @@ export default function Page() {
         Découvrir
         <br />
         Découvrir
-      </Button>
+      </Button> */}
       <Button debug={debug}>
         aonzeap jajz ljalj azl jazlj eazlj ealz <br />
         lelzrej zeljf qlejf lqej fqlej fzkej z<br />
