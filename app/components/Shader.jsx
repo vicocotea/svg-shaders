@@ -2,13 +2,14 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 
-const canvasDPI = 1.2;
+const canvasDPI = 1;
 
 export default function Shader({
   width = 100,
   height = 100,
   debug,
   style,
+  scale = 0,
   fragment,
   children,
   onFilterCreated,
@@ -24,27 +25,27 @@ export default function Shader({
   const mouseUsed = useRef(false);
   const [mouseDep, setMouseDep] = useState(0);
 
+  const canvasWidth = width;
+  const canvasHeight = height;
+
   useEffect(() => {
     mouseRef.current.x = mousePosition.x;
     mouseRef.current.y = mousePosition.y;
-    console.log("---Mouse updated:", mouseRef.current);
+    // console.log("---Mouse updated:", mouseRef.current);
     setMouseDep((prev) => {
-      console.log("---mouseDep changing from", prev, "to", prev + 1);
+      // console.log("---mouseDep changing from", prev, "to", prev + 1);
       return prev + 1;
     });
   }, [mousePosition.x, mousePosition.y]);
 
   useEffect(() => {
     if (!feImageRef.current) return;
-    
-    // Calculer l'offset basé sur la position de la souris (en pixels)
-    // Le feImage est 2x plus grand, donc on centre sur la position de la souris
+
     const offsetX = mousePosition.x - width;
     const offsetY = mousePosition.y - height;
-    
-    console.log("---Offset:", offsetX, offsetY, "Mouse:", mousePosition, "Size:", width, height);
-    feImageRef.current.setAttribute("x", offsetX);
-    feImageRef.current.setAttribute("y", offsetY);
+
+    // feImageRef.current.setAttribute("x", offsetX);
+    // feImageRef.current.setAttribute("y", offsetY);
   }, [mousePosition.x, mousePosition.y, width, height]);
 
   // Notify parent component of the filter ID
@@ -69,30 +70,33 @@ export default function Shader({
       },
     });
 
-    console.log("!!!!! Shader recalculating with mouse:", mouseRef.current);
-    console.log("!!!!! Width:", width, "Height:", height, "Type:", typeof width, typeof height);
     mouseUsed.current = false;
 
-    // S'assurer que width et height sont des entiers valides
-    // Le canvas doit être 2x plus grand pour permettre le déplacement
-    const w = Math.floor(width * 2 * canvasDPI);
-    const h = Math.floor(height * 2 * canvasDPI);
-    
-    console.log("!!!!! Canvas dimensions:", w, h, "Data length:", w * h * 4);
-    
+    const w = Math.floor(canvasWidth * canvasDPI);
+    const h = Math.floor(canvasHeight * canvasDPI);
+
+    // console.log("!!!!! Canvas dimensions:", w, h, "Data length:", w * h * 4);
+
     // Vérifier que les dimensions sont valides
     if (w <= 0 || h <= 0 || !isFinite(w) || !isFinite(h)) {
       console.error("!!!!! Invalid dimensions:", w, h);
       return;
     }
-    
+
     const data = new Uint8ClampedArray(w * h * 4);
-    
+
     // Vérifier que la longueur des données est correcte
     if (data.length !== w * h * 4) {
-      console.error("!!!!! Data length mismatch:", data.length, "expected:", w * h * 4);
+      console.error(
+        "!!!!! Data length mismatch:",
+        data.length,
+        "expected:",
+        w * h * 4
+      );
       return;
     }
+
+    // console.log("scale", scale);
 
     // Dynamic scale to make it as smooth as possible to ensure the best quality
     // but also meet the requirements of the shader.
@@ -124,17 +128,20 @@ export default function Shader({
       data[i + 2] = 0;
       data[i + 3] = 255;
     }
-    console.log("---ImageData length:", data.length, "Expected:", w * h * 4);
+    // console.log("---ImageData length:", data.length, "Expected:", w * h * 4);
     context.putImageData(new ImageData(data, w, h), 0, 0);
 
     feImageRef.current.setAttribute("href", canvas.toDataURL());
-    feDisplacementMapRef.current.setAttribute("scale", maxScale / canvasDPI);
+    // feDisplacementMapRef.current.setAttribute("scale", scale);//maxScale / canvasDPI);
+    // feDisplacementMapRef.current.setAttribute("scale", maxScale / canvasDPI);
     if (debugRef.current) {
       debugRef.current.textContent = `Displacement Map (scale = ${maxScale.toFixed(
         2
       )})`;
     }
   }, [width, height, fragment, mouseDep, canvasDPI]);
+
+
 
   return (
     <>
@@ -158,30 +165,38 @@ export default function Shader({
           >
             <feImage
               id={`${id}_map`}
-              width={width * 2}
-              height={height * 2}
-              x="0"
-              y="0"
+              width={canvasWidth * 1.2}
+              height={canvasHeight * 1.2}
+              x={`${-Math.floor(canvasWidth * 0.1)}px`}
+              y={`${-Math.floor(canvasHeight * 0.1)}px`}
               ref={feImageRef}
+              result="imageMap"
             />
+            
             <feDisplacementMap
               in="SourceGraphic"
-              in2={`${id}_map`}
+              in2="imageMap"
               xChannelSelector="R"
               yChannelSelector="G"
               ref={feDisplacementMapRef}
+              scale={scale}
             />
           </filter>
         </defs>
       </svg>
-
-      {children}
       <canvas
-        width={width * 2 * canvasDPI}
-        height={height * 2 * canvasDPI}
+        width={canvasWidth * canvasDPI}
+        height={canvasHeight * canvasDPI}
         ref={canvasRef}
-        style={{ display: debug ? "inline-block" : "none", width: width * 2, height: height * 2 }}
+        style={{
+          position: "absolute",
+          left: "100%",
+          display: debug ? "inline-block" : "none",
+          width: canvasWidth,
+          height: canvasHeight,
+        }}
       />
+      {children}
     </>
   );
 }
