@@ -12,6 +12,16 @@ body {
   line-height: 1.6;
 }
 
+/* Styles pour gérer l'overflow des filtres SVG */
+[style*="filter:"] {
+  overflow: visible;
+}
+
+/* Alternative: si vous voulez cacher l'overflow */
+/* [style*="filter:"] {
+  overflow: hidden;
+} */
+
 h1 {
   margin: 0;
 }
