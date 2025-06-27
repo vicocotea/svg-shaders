@@ -14,40 +14,15 @@ export default function Shader({
   children,
   onFilterCreated,
   mousePosition = { x: 0.5, y: 0.5 },
+  points = [],
 }) {
   const id = useId().replace(/[#:]/g, "-");
   const canvasRef = useRef();
   const feImageRef = useRef();
   const feDisplacementMapRef = useRef();
-  const debugRef = useRef();
 
-  const mouseRef = useRef({ x: 0.5, y: 0.5 });
-  const mouseUsed = useRef(false);
-  const [mouseDep, setMouseDep] = useState(0);
-
-  const radius = 100;
-  const canvasWidth = radius * 2;
-  const canvasHeight = radius * 2;
-
-  useEffect(() => {
-    mouseRef.current.x = mousePosition.x;
-    mouseRef.current.y = mousePosition.y;
-    // console.log("---Mouse updated:", mouseRef.current);
-    setMouseDep((prev) => {
-      // console.log("---mouseDep changing from", prev, "to", prev + 1);
-      return prev + 1;
-    });
-  }, [mousePosition.x, mousePosition.y]);
-
-  useEffect(() => {
-    if (!feImageRef.current) return;
-
-    const offsetX = mousePosition.x - width;
-    const offsetY = mousePosition.y - height;
-
-    // feImageRef.current.setAttribute("x", offsetX);
-    // feImageRef.current.setAttribute("y", offsetY);
-  }, [mousePosition.x, mousePosition.y, width, height]);
+  const canvasWidth = width;
+  const canvasHeight = height;
 
   // Notify parent component of the filter ID
   useEffect(() => {
@@ -58,11 +33,9 @@ export default function Shader({
 
   useEffect(() => {
     drawFragment();
-  }, [scale]);
+  }, [scale, width, height, points]);
 
   function drawFragment() {
-    console.log("drawFragment", scale);
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (!feImageRef.current) return;
@@ -78,32 +51,45 @@ export default function Shader({
     // but also meet the requirements of the shader.
     let maxScale = 0;
     const rawValues = [];
-    for (let i = 0; i < data.length; i += 4) {
-      const x = (i / 4) % w;
-      const y = ~~(i / 4 / w);
-      const pos = fragment(
-        {
-          x: x / w,
-          y: y / h,
-        }
-      );
-      const dx = pos.x * w - x;
-      const dy = pos.y * h - y;
-      maxScale = Math.max(maxScale, Math.abs(dx), Math.abs(dy));
-      rawValues.push(dx, dy);
+    
+    // Première passe : calculer les déplacements et trouver maxScale
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const uvX = x / w;
+        const uvY = y / h;
+        
+        const pos = fragment({
+          x: uvX,
+          y: uvY,
+        });
+        
+        const dx = pos.x * w - x;
+        const dy = pos.y * h - y;
+        
+        maxScale = Math.max(maxScale, Math.abs(dx), Math.abs(dy));
+        rawValues.push(dx, dy);
+      }
     }
-    maxScale *= 2;
-
+    
+    // Éviter la division par zéro et assurer une échelle minimale
+    maxScale = Math.max(maxScale, 1.0);
+    
+    // Deuxième passe : normaliser et écrire les données
     let index = 0;
     for (let i = 0; i < data.length; i += 4) {
-      const r = rawValues[index++] / maxScale + 0.5;
-      const g = rawValues[index++] / maxScale + 0.5;
-      data[i] = r * 255;
-      data[i + 1] = g * 255;
+      const dx = rawValues[index++];
+      const dy = rawValues[index++];
+      
+      const r = (dx / maxScale + 0.5);
+      const g = (dy / maxScale + 0.5);
+      
+      // Clamper les valeurs entre 0 et 1 pour éviter les artefacts
+      data[i] = Math.max(0, Math.min(255, r * 255));
+      data[i + 1] = Math.max(0, Math.min(255, g * 255));
       data[i + 2] = 0;
       data[i + 3] = 255;
     }
-    // console.log("---ImageData length:", data.length, "Expected:", w * h * 4);
+    
     context.putImageData(new ImageData(data, w, h), 0, 0);
 
     feImageRef.current.setAttribute("href", canvas.toDataURL());
@@ -125,42 +111,44 @@ export default function Shader({
             id={`${id}_filter`}
             filterUnits="userSpaceOnUse"
             primitiveUnits="userSpaceOnUse"
-            x="-10%"
-            y="-10%"
-            width="120%"
-            height="120%"
+            // x="-10%"
+            // y="-10%"
+            // width="120%"
+            // height="120%"
           >
-            <feFlood
+            {/* <feFlood
               floodColor="#808000"
               result="flood"
               x={`${-Math.floor(width * 0.2)}px`}
               y={`${-Math.floor(height * 0.2)}px`}
               width={width * 1.4}
               height={height * 1.4}
-            />
+            /> */}
             <feImage
               id={`${id}_map`}
               width={canvasWidth}
               height={canvasHeight}
-              x={mousePosition.x - canvasWidth / 2}
-              y={mousePosition.y - canvasHeight / 2}
+              x={-20}
+              y={-20}
+              //   x={mousePosition.x - canvasWidth / 2}
+              //   y={mousePosition.y - canvasHeight / 2}
               ref={feImageRef}
               result="imageMap"
               preserveAspectRatio="none"
             />
-
+            {/* 
             <feMerge result="composed">
               <feMergeNode in="flood" />
               <feMergeNode in="imageMap" />
-            </feMerge>
+            </feMerge> */}
 
             <feDisplacementMap
               in="SourceGraphic"
-              in2="composed"
+              in2="imageMap"
               xChannelSelector="R"
               yChannelSelector="G"
               ref={feDisplacementMapRef}
-              scale={scale}
+              scale={5}
             />
           </filter>
         </defs>
@@ -180,14 +168,6 @@ export default function Shader({
               filterUnits="userSpaceOnUse"
               primitiveUnits="userSpaceOnUse"
             >
-              <feFlood
-                floodColor="#808000"
-                result="flood"
-                x="-20%"
-                y="-20%"
-                width={width * 1.2}
-                height={height * 1.2}
-              />
               <feImage
                 width={canvasWidth}
                 height={canvasHeight}
@@ -197,10 +177,6 @@ export default function Shader({
                 result="imageMap"
                 preserveAspectRatio="none"
               />
-              <feMerge result="composed">
-                <feMergeNode in="flood" />
-                <feMergeNode in="imageMap" />
-              </feMerge>
             </filter>
           </defs>
           <rect

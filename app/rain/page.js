@@ -1,10 +1,11 @@
 "use client";
 
 import Button from "../components/Button";
+import ButtonCircle from "../components/ButtonCircle";
 import { useState } from "react";
 
 export default function Page() {
-  const [debug, setDebug] = useState(false);
+  const [debug, setDebug] = useState(true);
   return (
     <>
       <input
@@ -28,6 +29,9 @@ export default function Page() {
         lelzrej zeljf qlejf lqej fqlej fzkej z<br />
         eljrn elrjenr
       </Button>
+      <ButtonCircle debug={debug}>
+        aonzeap jajz ljalj azl jazlj
+      </ButtonCircle>
     </>
   );
 }

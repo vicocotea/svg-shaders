@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 const canvasDPI = 1;
 
-export default function Shader({
+export default function ShaderCircle({
   width = 100,
   height = 100,
   debug,
@@ -25,7 +25,7 @@ export default function Shader({
   const mouseUsed = useRef(false);
   const [mouseDep, setMouseDep] = useState(0);
 
-  const radius = 100;
+  const radius = 50;
   const canvasWidth = radius * 2;
   const canvasHeight = radius * 2;
 
@@ -58,11 +58,9 @@ export default function Shader({
 
   useEffect(() => {
     drawFragment();
-  }, [scale]);
+  }, []);
 
   function drawFragment() {
-    console.log("drawFragment", scale);
-    
     const canvas = canvasRef.current;
     if (!canvas) return;
     if (!feImageRef.current) return;
@@ -81,12 +79,10 @@ export default function Shader({
     for (let i = 0; i < data.length; i += 4) {
       const x = (i / 4) % w;
       const y = ~~(i / 4 / w);
-      const pos = fragment(
-        {
-          x: x / w,
-          y: y / h,
-        }
-      );
+      const pos = fragment({
+        x: x / w,
+        y: y / h,
+      });
       const dx = pos.x * w - x;
       const dy = pos.y * h - y;
       maxScale = Math.max(maxScale, Math.abs(dx), Math.abs(dy));
@@ -109,7 +105,6 @@ export default function Shader({
     feImageRef.current.setAttribute("href", canvas.toDataURL());
     // feDisplacementMapRef.current.setAttribute("scale", scale);//maxScale / canvasDPI);
   }
-
   return (
     <>
       <svg
@@ -179,20 +174,28 @@ export default function Shader({
               id={`${id}_debug_filter`}
               filterUnits="userSpaceOnUse"
               primitiveUnits="userSpaceOnUse"
+              x="-10%"
+              y="-10%"
+              width="120%"
+              height="120%"
             >
               <feFlood
                 floodColor="#808000"
                 result="flood"
-                x="-20%"
-                y="-20%"
-                width={width * 1.2}
-                height={height * 1.2}
+                x={`${-Math.floor(width * 0.2)}px`}
+                y={`${-Math.floor(height * 0.2)}px`}
+                width={width * 1.4}
+                height={height * 1.4}
+                // x="-20%"
+                // y="-20%"
+                // width={width * 1.2}
+                // height={height * 1.2}
               />
               <feImage
                 width={canvasWidth}
                 height={canvasHeight}
-                x="0"
-                y="0"
+                x={mousePosition.x - canvasWidth / 2}
+                y={mousePosition.y - canvasHeight / 2}
                 href={canvasRef.current?.toDataURL()}
                 result="imageMap"
                 preserveAspectRatio="none"
