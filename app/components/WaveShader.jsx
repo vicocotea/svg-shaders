@@ -1,26 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import BaseShader from "./BaseShader";
 import { useShader } from "../hook/useShader";
 
-export default function ShaderImage({
+export default function WaveShader({
   width = 100,
   height = 100,
   debug,
   style,
-  scale = 0,
-  fragment,
+  amplitude = 20,
+  frequency = 0.02,
+  speed = 0.001,
   children,
   onFilterCreated,
-  mousePosition = { x: 0.5, y: 0.5 },
-  points = [],
 }) {
+  const [time, setTime] = useState(0);
+
+  // Animation loop
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(prev => prev + speed);
+    }, 16);
+    return () => clearInterval(interval);
+  }, [speed]);
+
   const { feImageRef, feDisplacementMapRef, drawFragment } = useShader({
-    fragment,
+    fragment: ({ x, y }) => ({
+      x: x + Math.sin(y * frequency + time) * amplitude / width,
+      y: y,
+    }),
     canvasWidth: width,
     canvasHeight: height,
-    scale,
-    points,
   });
 
   const renderFilter = (id, canvasRef) => (
@@ -33,8 +44,8 @@ export default function ShaderImage({
         id={`${id}_map`}
         width={width}
         height={height}
-        x={-20}
-        y={-20}
+        x="0"
+        y="0"
         ref={feImageRef}
         result="imageMap"
         preserveAspectRatio="none"
@@ -45,7 +56,7 @@ export default function ShaderImage({
         xChannelSelector="R"
         yChannelSelector="G"
         ref={feDisplacementMapRef}
-        scale={5}
+        scale={amplitude}
       />
     </filter>
   );
@@ -74,15 +85,14 @@ export default function ShaderImage({
       height={height}
       debug={debug}
       style={style}
-      fragment={fragment}
       children={children}
       onFilterCreated={onFilterCreated}
       canvasWidth={width}
       canvasHeight={height}
       renderFilter={renderFilter}
       renderDebugFilter={renderDebugFilter}
-      dependencies={[scale, width, height, points]}
+      dependencies={[time, amplitude, frequency]}
       drawFragment={drawFragment}
     />
   );
-}
+} 

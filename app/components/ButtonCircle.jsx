@@ -167,7 +167,7 @@ export default function ButtonCircle({
             const waveSpacing = baseWaveSpacing * lifeFactor;
 
             // Améliorer le calcul de lifeIntensity pour éviter les discontinuités
-            const lifeIntensity = (1 - point.life / 100);
+            const lifeIntensity = 1 - point.life / 100;
 
             // Créer une seule vague par point
             const waveRadius = waveSpacing * 5;
