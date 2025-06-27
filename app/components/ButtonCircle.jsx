@@ -8,6 +8,8 @@ export default function ButtonCircle({
   debug,
   onClick,
   style,
+  activeLabel,
+  inactiveLabel,
   ...props
 }) {
   const [radius, setRadius] = useState(0.5);
@@ -18,6 +20,7 @@ export default function ButtonCircle({
   const buttonRef = useRef();
   const [filterId, setFilterId] = useState("");
   const [points, setPoints] = useState([]);
+  const [isActive, setIsActive] = useState(false);
 
   // Animation des points avec leur life
   useEffect(() => {
@@ -88,7 +91,11 @@ export default function ButtonCircle({
       const uvX = (x + 20) / (rect.width + 40);
       const uvY = (y + 20) / (rect.height + 40);
 
-      setPoints([...points, { x: uvX, y: uvY, life: 0 }]);
+      setPoints([
+        ...points,
+        { x: uvX, y: uvY, life: 0, color: isActive ? "#000000" : "#0077cc" },
+      ]);
+      setIsActive(!isActive);
     },
     [points]
   );
@@ -240,28 +247,33 @@ export default function ButtonCircle({
       <button
         ref={buttonRef}
         onClick={handleClick}
+        className={`button ${isActive ? "toggle" : ""}`}
         style={{
-          position: "relative",
-          color: "white",
-          padding: "12px 24px",
-          fontSize: "1rem",
-          fontWeight: "bold",
-          cursor: "pointer",
-          border: "none",
-          outline: "none",
-          backgroundColor: "red",
-          borderRadius: "8px",
-          minWidth: "120px",
-          minHeight: "48px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           filter: filterId ? `url(#${filterId})` : "none",
           ...style,
         }}
         {...props}
       >
-        {children || "Click me"}
+        {points.map((point, index) => (
+          <span
+            key={index}
+            className="button-point"
+            style={{
+              left: point.x * buttonSize.width - 20 - 5,
+              top: point.y * buttonSize.height - 20 - 5,
+              transform: `scale(${point.life / 3.75})`,
+              opacity: Math.min(1, point.life / 50),
+              backgroundColor: point.color,
+            }}
+          ></span>
+        ))}
+        {children && <span className="button-text">{children}</span>}
+        {!children && (
+          <span className="button-text-container">
+            <span className="button-text" style={{ opacity: isActive ? 0 : 1 }}>{activeLabel}</span>
+            <span className="button-text" style={{ opacity: isActive ? 1 : 0 }}>{inactiveLabel}</span>
+          </span>
+        )}
       </button>
     </div>
   );

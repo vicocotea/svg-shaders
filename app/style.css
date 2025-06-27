@@ -10,6 +10,7 @@ body {
   margin: 0;
   padding: 20px;
   line-height: 1.6;
+  background-color: #BBB;
 }
 
 /* Styles pour gérer l'overflow des filtres SVG */
@@ -29,6 +30,52 @@ h1 {
 footer {
   margin-top: 20px;
   font-size: 0.9em;
+}
+
+.button {
+  position: relative;
+  color: white;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background-color: black;
+  border-radius: 8px;
+  min-width: 120px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: none;
+  transition: background-color 1s ease, color 1s ease;
+  overflow: hidden;
+}
+
+.button-point {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 0;
+  left: 0;
+  background-color: white;
+  border-radius: 50%;
+  background-color: #0077cc;
+  /* background: radial-gradient(circle, rgba(255, 255, 255, 0) 0%, rgba(0, 255, 0, 1) 100%); */
+}
+.button.toggle {
+  background-color: #0077cc;
+}
+.button-text-container {
+  display: grid;
+}
+.button-text {
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+  grid-column-start: 1;
+  grid-row-start: 1;
 }
 
 a {

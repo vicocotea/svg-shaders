@@ -28,13 +28,17 @@ export default function ShaderImage({
       id={`${id}_filter`}
       filterUnits="userSpaceOnUse"
       primitiveUnits="userSpaceOnUse"
+      x={-20}
+      y={-20}
+      width={width}
+      height={height}
     >
       <feImage
         id={`${id}_map`}
         width={width}
         height={height}
-        x={-20}
-        y={-20}
+        // x={-20}
+        // y={-20}
         ref={feImageRef}
         result="imageMap"
         preserveAspectRatio="none"

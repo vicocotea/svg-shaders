@@ -2,6 +2,7 @@
 
 import Button from "../components/Button";
 import ButtonCircle from "../components/ButtonCircle";
+import ButtonWave from "../components/ButtonWave";
 import { useState } from "react";
 
 export default function Page() {
@@ -11,6 +12,7 @@ export default function Page() {
       <input
         type="checkbox"
         id="debug"
+        checked={debug}
         onChange={() => {
           setDebug(document.getElementById("debug").checked);
         }}
@@ -25,13 +27,12 @@ export default function Page() {
         Découvrir
       </Button> */}
       <Button debug={debug}>
-        aonzeap jajz ljalj azl jazlj eazlj ealz <br />
-        lelzrej zeljf qlejf lqej fqlej fzkej z<br />
-        eljrn elrjenr
+        Test
       </Button>
-      <ButtonCircle debug={debug}>
-        aonzeap jajz ljalj azl jazlj
-      </ButtonCircle>
+      <ButtonCircle debug={debug} activeLabel="Enable" inactiveLabel="Disable"></ButtonCircle>
+      <ButtonWave debug={debug}>
+        Enable
+      </ButtonWave>
     </>
   );
 }
