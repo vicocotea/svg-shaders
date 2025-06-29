@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useMotionValue, useSpring } from "motion/react";
 import { texture } from "../utils/shader";
 import ShaderImage from "./ShaderImage";
+import { useAnimatedPoints } from "../hook/useAnimatedNumber";
 
 export default function ButtonCircle({
   children,
@@ -19,37 +20,10 @@ export default function ButtonCircle({
 
   const buttonRef = useRef();
   const [filterId, setFilterId] = useState("");
-  const [points, setPoints] = useState([]);
   const [isActive, setIsActive] = useState(false);
 
-  // Animation des points avec leur life
-  useEffect(() => {
-    if (points.length === 0) return;
-
-    let animationId;
-
-    const animatePoints = () => {
-      setPoints(
-        (prevPoints) =>
-          prevPoints
-            .map((point) => ({
-              ...point,
-              life: Math.min(100, point.life + 1), // Décrémenter life
-            }))
-            .filter((point) => point.life < 100) // Supprimer les points avec life <= 0
-      );
-
-      animationId = requestAnimationFrame(animatePoints);
-    };
-
-    animationId = requestAnimationFrame(animatePoints);
-
-    return () => {
-      if (animationId) {
-        cancelAnimationFrame(animationId);
-      }
-    };
-  }, [points.length]);
+  // Utiliser le hook pour animer les points
+  const [points, addPoint] = useAnimatedPoints([], 1000);
 
   // Mesurer la taille réelle du bouton
   useEffect(() => {
@@ -91,13 +65,10 @@ export default function ButtonCircle({
       const uvX = (x + 20) / (rect.width + 40);
       const uvY = (y + 20) / (rect.height + 40);
 
-      setPoints([
-        ...points,
-        { x: uvX, y: uvY, life: 0, color: isActive ? "#000000" : "#0077cc" },
-      ]);
+      addPoint({ x: uvX, y: uvY, life: 0, color: isActive ? "#000000" : "#0077cc" });
       setIsActive(!isActive);
     },
-    [points]
+    [addPoint, isActive]
   );
 
   const handlePointerUp = useCallback(() => {
@@ -262,7 +233,7 @@ export default function ButtonCircle({
               left: point.x * buttonSize.width - 20 - 5,
               top: point.y * buttonSize.height - 20 - 5,
               transform: `scale(${point.life / 3.75})`,
-              opacity: Math.min(1, point.life / 50),
+              opacity: 1 - Math.max(0, point.life - 50) / 50,
               backgroundColor: point.color,
             }}
           ></span>

@@ -17,19 +17,10 @@ export default function Page() {
           setDebug(document.getElementById("debug").checked);
         }}
       />
-      {/* <Button debug={debug}></Button>
-      <Button debug={debug}>Découvrir</Button>
-      <Button debug={debug}>
-        Découvrir
-        <br />
-        Découvrir
-        <br />
-        Découvrir
-      </Button> */}
       <Button debug={debug}>
         Test
       </Button>
-      <ButtonCircle debug={debug} activeLabel="Enable" inactiveLabel="Disable"></ButtonCircle>
+      <ButtonCircle debug={debug} activeLabel="Enable the button long text" inactiveLabel="Disable"></ButtonCircle>
       <ButtonWave debug={debug}>
         Enable
       </ButtonWave>
