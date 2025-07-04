@@ -8,8 +8,6 @@ export default function BaseShader({
   width = 100,
   height = 100,
   debug,
-  style,
-  fragment,
   children,
   onFilterCreated,
   canvasWidth,
@@ -56,7 +54,6 @@ export default function BaseShader({
           width={width}
           height={height}
           filterUnits="userSpaceOnUse"
-          style={{ border: "1px solid red", margin: "10px" }}
         >
           <defs>
             {renderDebugFilter(id, canvasRef)}
@@ -75,7 +72,7 @@ export default function BaseShader({
         height={(canvasHeight || height) * canvasDPI}
         ref={canvasRef}
         style={{
-          display: debug ? "inline-block" : "none",
+          display: "none",
           width: canvasWidth || width,
           height: canvasHeight || height,
         }}

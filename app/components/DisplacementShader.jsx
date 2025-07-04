@@ -13,6 +13,8 @@ export default function DisplacementShader({
   children,
   onFilterCreated,
   points = [],
+  buttonSize = { width: 200, height: 200 },
+  intensity = 0.5,
 }) {
   const { feImageRef, feDisplacementMapRef, drawFragment } = useShader({
     fragment,
@@ -20,6 +22,8 @@ export default function DisplacementShader({
     canvasHeight: height,
     scale,
     points,
+    buttonSize,
+    intensity,
   });
 
   const renderFilter = (id, canvasRef) => (
@@ -46,7 +50,7 @@ export default function DisplacementShader({
         xChannelSelector="R"
         yChannelSelector="G"
         ref={feDisplacementMapRef}
-        scale={10}
+        scale={6}
       />
     </filter>
   );
@@ -82,7 +86,7 @@ export default function DisplacementShader({
       canvasHeight={height}
       renderFilter={renderFilter}
       renderDebugFilter={renderDebugFilter}
-      dependencies={[scale, width, height, points]}
+      dependencies={[scale, width, height, points, buttonSize, intensity]}
       drawFragment={drawFragment}
     />
   );

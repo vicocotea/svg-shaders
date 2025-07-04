@@ -51,6 +51,7 @@ footer {
   filter: none;
   transition: background-color 1s ease, color 1s ease;
   overflow: hidden;
+  margin-block: 1rem;
 }
 
 .button-point {
