@@ -42,6 +42,7 @@ export default function BaseShader({
         colorInterpolationFilters="sRGB"
         width={0}
         height={0}
+        style={{ display: "none" }}
       >
         <defs>
           {renderFilter(id, canvasRef)}

@@ -8,7 +8,7 @@ export default function DisplacementShader({
   height = 100,
   debug,
   style,
-  scale = 0,
+  scale = 10,
   fragment,
   children,
   onFilterCreated,
@@ -50,7 +50,7 @@ export default function DisplacementShader({
         xChannelSelector="R"
         yChannelSelector="G"
         ref={feDisplacementMapRef}
-        scale={6}
+        scale={scale}
       />
     </filter>
   );

@@ -7,6 +7,8 @@ export default function SimpleButton({
   style,
   activeLabel,
   inactiveLabel,
+  scale = 10,
+  intensity = 0.5,
 }) {
   return (
     <DisplacementButton
@@ -15,6 +17,8 @@ export default function SimpleButton({
       activeLabel={activeLabel}
       inactiveLabel={inactiveLabel}
       debug={debug}
+      scale={scale}
+      intensity={intensity}
       fragment={(uv, points, buttonSize, intensity) => {
         // Simple ripple effect
         let totalDisplacementX = 0;
@@ -36,7 +40,7 @@ export default function SimpleButton({
           const distance = Math.sqrt(adjustedX ** 2 + adjustedY ** 2);
 
           // Create a simple ripple effect
-          const rippleRadius = 0.1 + (point.life / 100);
+          const rippleRadius = 0.01 + 2 * (point.life / 100);
           const rippleStrength = Math.max(0, 1 - point.life / 100);
           
           if (distance < rippleRadius && rippleStrength > 0.01) {

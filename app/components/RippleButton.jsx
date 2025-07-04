@@ -6,7 +6,9 @@ export default function RippleButton({
   onClick,
   style,
   activeLabel,
-  inactiveLabel
+  inactiveLabel,
+  scale = 10,
+  intensity = 0.5,
 }) {
   return (
     <DisplacementButton
@@ -15,6 +17,8 @@ export default function RippleButton({
       activeLabel={activeLabel}
       inactiveLabel={inactiveLabel}
       debug={debug}
+      scale={scale}
+      intensity={intensity}
       fragment={(uv, points, buttonSize, intensity) => {
         let totalDisplacementX = 0;
         let totalDisplacementY = 0;

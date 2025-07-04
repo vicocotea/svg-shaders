@@ -11,10 +11,10 @@ export default function DisplacementButton({
   activeLabel,
   inactiveLabel,
   fragment,
+  scale = 10,
+  intensity = 0.5,
   ...props
 }) {
-  const [radius, setRadius] = useState(0.5);
-  const [intensity, setIntensity] = useState(0.5);
   const [buttonSize, setButtonSize] = useState({ width: 200, height: 200 });
 
   const buttonRef = useRef();
@@ -98,7 +98,7 @@ export default function DisplacementButton({
         width={buttonSize.width}
         height={buttonSize.height}
         debug={debug}
-        scale={0}
+        scale={scale}
         points={points}
         buttonSize={buttonSize}
         intensity={intensity}
