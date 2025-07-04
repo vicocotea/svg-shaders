@@ -87,16 +87,16 @@ export default function Shader({
       <feFlood
         floodColor="#808000"
         result="flood"
-        x="-20%"
-        y="-20%"
-        width={width * 1.2}
-        height={height * 1.2}
+        x={`${-Math.floor(width * 0.2)}px`}
+        y={`${-Math.floor(height * 0.2)}px`}
+        width={width * 1.4}
+        height={height * 1.4}
       />
       <feImage
         width={canvasWidth}
         height={canvasHeight}
-        x="0"
-        y="0"
+        x={mousePosition.x - canvasWidth / 2}
+        y={mousePosition.y - canvasHeight / 2}
         href={canvasRef.current?.toDataURL()}
         result="imageMap"
         preserveAspectRatio="none"

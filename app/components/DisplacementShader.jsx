@@ -1,37 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import BaseShader from "./BaseShader";
 import { useShader } from "../hook/useShader";
 
-export default function WaveShader({
+export default function DisplacementShader({
   width = 100,
   height = 100,
   debug,
   style,
-  amplitude = 20,
-  frequency = 0.02,
-  speed = 0.001,
+  scale = 0,
+  fragment,
   children,
   onFilterCreated,
+  points = [],
 }) {
-  const [time, setTime] = useState(0);
-
-  // Animation loop
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(prev => prev + speed);
-    }, 16);
-    return () => clearInterval(interval);
-  }, [speed]);
-
   const { feImageRef, feDisplacementMapRef, drawFragment } = useShader({
-    fragment: ({ x, y }) => ({
-      x: x + Math.sin(y * frequency + time) * amplitude / width,
-      y: y,
-    }),
+    fragment,
     canvasWidth: width,
     canvasHeight: height,
+    scale,
+    points,
   });
 
   const renderFilter = (id, canvasRef) => (
@@ -39,13 +27,15 @@ export default function WaveShader({
       id={`${id}_filter`}
       filterUnits="userSpaceOnUse"
       primitiveUnits="userSpaceOnUse"
+      x={-20}
+      y={-20}
+      width={width}
+      height={height}
     >
       <feImage
         id={`${id}_map`}
         width={width}
         height={height}
-        x="0"
-        y="0"
         ref={feImageRef}
         result="imageMap"
         preserveAspectRatio="none"
@@ -56,7 +46,7 @@ export default function WaveShader({
         xChannelSelector="R"
         yChannelSelector="G"
         ref={feDisplacementMapRef}
-        scale={amplitude}
+        scale={10}
       />
     </filter>
   );
@@ -85,14 +75,15 @@ export default function WaveShader({
       height={height}
       debug={debug}
       style={style}
+      fragment={fragment}
       children={children}
       onFilterCreated={onFilterCreated}
       canvasWidth={width}
       canvasHeight={height}
       renderFilter={renderFilter}
       renderDebugFilter={renderDebugFilter}
-      dependencies={[time, amplitude, frequency]}
+      dependencies={[scale, width, height, points]}
       drawFragment={drawFragment}
     />
   );
-} 
+}
