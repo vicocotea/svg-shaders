@@ -5,6 +5,7 @@ import { useState } from "react";
 import WaveButton from "./components/WaveButton";
 import RippleButton from "./components/RippleButton";
 import SimpleButton from "./components/SimpleButton";
+import ZoomButton from "./components/ZoomButton";
 import TweakpanePanel from "./components/TweakpanePanel";
 
 import { useEffect } from "react";
@@ -26,7 +27,11 @@ export default function Page() {
         inactiveLabel="Disable"
         intensity={params.intensity}
         scale={params.scale}
-      ></SimpleButton>
+      >
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-bold text-orange">Simple Button</h1>
+        </div>
+      </SimpleButton>
 
       <WaveButton
         debug={params.debug}
@@ -43,6 +48,14 @@ export default function Page() {
         intensity={params.intensity}
         scale={params.scale}
       ></RippleButton>
+{/* 
+      <ZoomButton
+        debug={params.debug}
+        activeLabel="Enable"
+        inactiveLabel="Disable"
+        intensity={params.intensity}
+        scale={params.scale}
+      ></ZoomButton> */}
     </>
   );
 }

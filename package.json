@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "export": "next build"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "next": "^15.0.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-animate-number": "^1.0.6",
     "tweakpane": "^4.0.5"
   }
 }

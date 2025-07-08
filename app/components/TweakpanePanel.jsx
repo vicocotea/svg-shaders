@@ -26,7 +26,7 @@ export default function TweakpanePanel({ onParamsChange }) {
       const params = {
         intensity: 0.5,
         scale: 10,
-        debug: false,
+        debug: true,
       };
 
       // Add sliders
