@@ -1,5 +1,2 @@
-# Composable SVG Shaders
+# svg shader
 
-https://svg-shaders.vercel.app
-
-https://github.com/shuding/svg-shaders
